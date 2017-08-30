@@ -26,7 +26,10 @@ dependencies {
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
 }
 
-greeting.message = 'Hi from Charles'
+greeting {
+    message = 'Hi'
+    greeter = 'Gradle'
+}
 
 class CharlesPlugin implements Plugin<Project> {
     void apply(Project project) {
@@ -35,12 +38,13 @@ class CharlesPlugin implements Plugin<Project> {
         // Add a task that uses the configuration
         project.task('hello') {
             doLast {
-                println project.greeting.message
+                println "${project.greeting.message} from ${project.greeting.greeter}"
             }
         }
     }
 }
 
 class CharlesPluginExtension {
-    def String message = 'Hello from CharlesPlugin'
+    String message
+    String greeter
 }
