@@ -37,6 +37,8 @@ class CharlesPlugin implements Plugin<Project> {
         project.extensions.create("greeting", CharlesPluginExtension)
         // Add a task that uses the configuration
         project.task('hello') {
+            group = 'build script tasks'
+            description = 'hello'
             doLast {
                 println "${project.greeting.message} from ${project.greeting.greeter}"
             }
@@ -52,6 +54,14 @@ class CharlesPluginExtension {
 class CharlesToFileTask extends DefaultTask {
 
     def destination
+
+    String getGroup() {
+        "Charles to File"
+    }
+
+    String getDescription() {
+        "Write Charles proxy settings to file"
+    }
 
     File getDestination() {
         project.file(destination)
