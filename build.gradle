@@ -48,3 +48,31 @@ class CharlesPluginExtension {
     String message
     String greeter
 }
+
+class CharlesToFileTask extends DefaultTask {
+
+    def destination
+
+    File getDestination() {
+        project.file(destination)
+    }
+
+    @TaskAction
+    def proxy() {
+        def file = getDestination()
+        file.parentFile.mkdirs()
+        file.write "port:8888"
+    }
+}
+
+task proxy(type: CharlesToFileTask) {
+    destination = { project.proxyFile }
+}
+
+task validateProxy(dependsOn: proxy) {
+    doLast {
+        println file(proxyFile).text
+    }
+}
+
+ext.proxyFile = "$buildDir/proxy.txt"
