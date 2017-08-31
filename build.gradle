@@ -9,8 +9,6 @@
 // Apply the groovy plugin to add support for Groovy
 apply plugin: 'groovy'
 
-apply plugin: CharlesPlugin
-
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use jcenter for resolving your dependencies.
@@ -19,101 +17,27 @@ repositories {
 }
 
 dependencies {
-    // Use the latest Groovy version for building this library
-    compile 'org.codehaus.groovy:groovy-all:2.4.11'
-
-    // Use the awesome Spock testing and specification framework
-    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+    compile gradleApi()
+    compile localGroovy()
 }
 
-charlesManifest {
-    message = 'port:8888'
-    outputFiles = files("$buildDir/AndroidManifest-1.xml", "$buildDir/AndroidManifest-2.xml")
+apply plugin: 'maven'
+
+repositories {
+    mavenCentral()
 }
 
-class CharlesPlugin implements Plugin<Project> {
-    void apply(Project project) {
-        // Add the 'greeting' extension object
-        def extension = project.extensions.create('charlesManifest', CharlesPluginExtension, project)
-        // Add a task that uses the configuration
-        project.task('initializeCharles', type:CharlesToFileTask) {
-            message = extension.messageProvider
-            outputFiles = extension.outputFiles
-        }
-    }
+dependencies {
+    testCompile 'junit:junit:4.12'
 }
 
-class CharlesPluginExtension {
-    final org.gradle.api.provider.PropertyState<String> message
-    final ConfigurableFileCollection outputFiles
+group = charlesPluginGroup
+version = charlesPluginVersion
 
-    CharlesPluginExtension(Project project) {
-        message = project.property(String)
-        setMessage('Hello from CharlesPlugin')
-        outputFiles = project.files()
-    }
-
-    String getMessage() {
-        message.get()
-    }
-
-    org.gradle.api.provider.Provider<String> getMessageProvider() {
-        message
-    }
-
-    void setMessage(String message) {
-        this.message.set(message)
-    }
-
-    FileCollection getOutputFiles() {
-        outputFiles
-    }
-
-    void setOutputFiles(FileCollection outputFiles) {
-        this.outputFiles.setFrom(outputFiles)
-    }
-}
-
-class CharlesToFileTask extends DefaultTask {
-
-    final org.gradle.api.provider.PropertyState<String> message = project.property(String)
-    final ConfigurableFileCollection outputFiles = project.files()
-
-    String getGroup() {
-        "Charles to File"
-    }
-
-    String getDescription() {
-        "Write Charles proxy settings to file"
-    }
-
-    @Input
-    String getMessage() {
-        message.get()
-    }
-
-    void setMessage(String message) {
-        this.message.set(message)
-    }
-
-    void setMessage(org.gradle.api.provider.Provider<String> message) {
-        this.message.set(message)
-    }
-
-    FileCollection getOutputFiles() {
-        outputFiles
-    }
-
-    void setOutputFiles(FileCollection outputFiles) {
-        this.outputFiles.setFrom(outputFiles)
-    }
-
-    @TaskAction
-    def configureManifest() {
-        getOutputFiles().each {
-            logger.quiet "Writing port to manifiest"
-//            it.text = getMessage()
-            it.append(getMessage()+"\n")
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri('../repo'))
         }
     }
 }
